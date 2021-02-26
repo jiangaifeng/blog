@@ -197,3 +197,47 @@ private void doFilterInternal(ServletRequest request, ServletResponse response, 
         }
     }
 ```
+
+```
+//AbstractAuthenticationProcessingFilter.class
+public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest)req;
+        HttpServletResponse response = (HttpServletResponse)res;
+        //判断当前filter是否可以处理当前请求(也就是是否包含用户名密码信息)
+        if (!this.requiresAuthentication(request, response)) {
+            chain.doFilter(request, response);
+        } else {
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Request is to process authentication");
+            }
+
+            Authentication authResult;
+            try {
+                //由子类UsernamePasswordAuthenticationFilter实现
+                authResult = this.attemptAuthentication(request, response);
+                if (authResult == null) {
+                    return;
+                }
+
+                //认证成功后，处理一些与session相关的方法
+                this.sessionStrategy.onAuthentication(authResult, request, response);
+            } catch (InternalAuthenticationServiceException var8) {
+                this.logger.error("An internal error occurred while trying to authenticate the user.", var8);
+                this.unsuccessfulAuthentication(request, response, var8);
+                return;
+            } catch (AuthenticationException var9) {
+                this.unsuccessfulAuthentication(request, response, var9);
+                return;
+            }
+
+            if (this.continueChainBeforeSuccessfulAuthentication) {
+                chain.doFilter(request, response);
+            }
+
+            //认证成功后的相关回调方法，主要将当前的认证放到SecurityContextHolder中
+            this.successfulAuthentication(request, response, chain, authResult);
+        }
+    }
+
+
+```
