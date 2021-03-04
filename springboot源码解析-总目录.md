@@ -12,8 +12,6 @@ tags:
 
 > 主要素材来源于慕课网上的视频教程[《全方位深入解析最新版SpringBoot源码》](https://coding.imooc.com/learn/list/404.html/)
 
-# 系统初始化器
-# bean的生命之源
 
 
 
